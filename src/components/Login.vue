@@ -1,48 +1,34 @@
 <template>
-  <transition name="slide">
-    <div v-if="!auth" class="login">
-      <button class="btn-login" @click="loginWithGoogle">
-        <img src="@/assets/images/google-logo.png" alt="" />
-        <span>Login with Google</span>
-      </button>
-    </div>
-  </transition>
+  <div class="login">
+    <button class="btn-login" @click="loginWithGoogle">
+      <img src="@/assets/images/google-logo.png" alt="" />
+      <span>Login with Google</span>
+    </button>
+  </div>
 </template>
 
 <script>
 import db from "@/plugins/firebase.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithPopup,
-} from "@firebase/auth";
-import { doc, setDoc, updateDoc } from "@firebase/firestore";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { mapGetters } from "vuex";
 
 const provider = new GoogleAuthProvider();
 
 export default {
   name: "Login",
-  props: {
-    authentication: Boolean,
-  },
-  data() {
-    return {
-      auth: null,
-    };
+  computed: {
+    ...mapGetters({
+      me: "me/info",
+    }),
   },
 
   async created() {
-    await onAuthStateChanged(getAuth(), async (user) => {
-      if (user) {
-        this.auth = user;
-        let authToken = localStorage.getItem("firebase-auth-token");
+    if (localStorage.getItem("emailForSignIn")) {
+      await this.$store.dispatch("me/getInfo");
 
-        await updateDoc(doc(db, "user", authToken), {
-          online: true,
-        });
-      }
-    });
+      this.$router.push({ name: "Home" });
+    }
   },
 
   methods: {
@@ -57,9 +43,10 @@ export default {
             online: true,
           });
 
+          this.$store.commit("me/SET_ME", result.user);
           localStorage.setItem("firebase-auth-token", this.auth.uid);
           localStorage.setItem("emailForSignIn", this.auth.email);
-          this.$emit("set-auth", true);
+          this.$router.push({ name: "Home" });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -106,23 +93,6 @@ export default {
       width: 15px;
       margin-right: 10px;
     }
-  }
-}
-
-.slide {
-  &-enter,
-  &-leave-to {
-    transform: translateY(-100vh);
-  }
-
-  &-enter-active,
-  &-leave-active {
-    transition: ease all 0.4s;
-  }
-
-  &-enter-to,
-  &-leave {
-    transform: translateY(0);
   }
 }
 </style>

@@ -87,11 +87,6 @@ export default {
     };
   },
 
-  async created() {
-    // get auth info
-    await this.getAuthStatus();
-  },
-
   mounted() {
     // get chat
     const q = query(collection(db, "chat"), orderBy("timestamp", "asc"));
@@ -200,19 +195,6 @@ export default {
         chatBox.scrollTop = chatBox.scrollHeight;
       }
     },
-
-    // async getAuthStatus() {
-    //   await onAuthStateChanged(getAuth(), async (user) => {
-    //     if (user) {
-    //       this.auth = user;
-    //       let authToken = localStorage.getItem("firebase-auth-token");
-
-    //       await updateDoc(doc(db, "user", authToken), {
-    //         online: true,
-    //       });
-    //     }
-    //   });
-    // },
 
     chooseRoom(roomId) {
       this.roomActive = roomId;
