@@ -43,7 +43,7 @@ export default {
             online: true,
           });
 
-          this.$store.commit("me/SET_ME", result.user);
+          this.$store.commit("me/SET_INFO", result.user);
           localStorage.setItem("firebase-auth-token", this.auth.uid);
           localStorage.setItem("emailForSignIn", this.auth.email);
           this.$router.push({ name: "Home" });

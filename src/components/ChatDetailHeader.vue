@@ -1,18 +1,21 @@
 <template>
   <div class="header">
     <div class="avatar">
-      <img :src="userData.avatar" :alt="userData.nickname" />
+      <img :src="target.avatar" :alt="target.nickname" />
     </div>
 
-    <h3>{{ userData.nickname }}</h3>
+    <h3>{{ target.nickname }}</h3>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "ChatDetailHeader",
-  props: {
-    userData: Object,
+  computed: {
+    ...mapGetters({
+      target: "chat/target",
+    }),
   },
 };
 </script>
@@ -22,7 +25,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 10px;
-  border-bottom: 1px solid #cecece;
+  border-bottom: 1px solid #e9e9e9;
   .avatar {
     width: 50px;
     height: 50px;

@@ -1,48 +1,11 @@
 <template>
   <div class="chat">
-    <div class="chat-room">
-      <h2 class="chat-title">Chats</h2>
-      <button
-        v-for="(item, key) of users"
-        :key="key"
-        :class="[checkActiveMsg(item.id) ? 'active' : '', 'list-user__item']"
-        @click="openChatHistories(item.email)"
-      >
-        <div class="_avatar">
-          <img :src="item.avatar" :alt="item.nickname" />
-          <span :class="[item.online === true ? 'active' : '', 'dot']"></span>
-        </div>
-        {{ item.nickname }}
-      </button>
-    </div>
-    <div v-if="auth" class="chat-detail">
-      <template v-if="targetInfo">
-        <ChatDetailHeader :userData="targetInfo" />
-      </template>
+    <ChatListUser />
+    <div class="chat-detail">
+      <ChatDetailHeader />
       <div class="chat-detail__body">
-        <div class="chat-history" id="chat-histories">
-          <div
-            v-for="(item, key) of messages"
-            :key="key"
-            :class="[item.userId.includes(auth.uid) ? 'rtl' : 'ltr', 'mes-box']"
-          >
-            <div class="mes">{{ item.content }}</div>
-            <span class="time">{{ getTime(item.createdAt) }}</span>
-          </div>
-        </div>
-        <form v-if="targetInfo" class="chat-form" @submit.prevent="sentMessage">
-          <input
-            type="text"
-            v-model="messageInput"
-            placeholder="Send a message..."
-          />
-          <button
-            :class="{ active: messageInput }"
-            :disabled="messageInput.length === 0"
-          >
-            <span class="material-icons-round"> send </span>
-          </button>
-        </form>
+        <ChatMessage />
+        <ChatForm />
       </div>
     </div>
   </div>
@@ -50,235 +13,41 @@
 
 <script>
 import db from "@/plugins/firebase.js";
+import { doc, updateDoc } from "firebase/firestore";
+import { mapGetters } from "vuex";
 
-import {
-  collection,
-  query,
-  addDoc,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-  where,
-  getDocs,
-} from "firebase/firestore";
-
+import ChatMessage from "./ChatMessage.vue";
+import ChatForm from "./ChatForm.vue";
 import ChatDetailHeader from "./ChatDetailHeader.vue";
+import ChatListUser from "./ChatListUser.vue";
 
 export default {
   name: "Chat",
-  components: { ChatDetailHeader },
+  components: { ChatDetailHeader, ChatListUser, ChatMessage, ChatForm },
   props: {
     auth: Object,
   },
-  data() {
-    return {
-      messageInput: "",
-      histories: {
-        uid: "",
-        messages: [],
-      },
-      token: "",
-      rooms: [],
-      roomActive: "",
-      userFB: null,
-      users: [],
-      targetInfo: null,
-    };
+
+  computed: {
+    ...mapGetters({
+      me: "me/info",
+    }),
   },
 
   mounted() {
-    // get chat
-    const q = query(collection(db, "chat"), orderBy("timestamp", "asc"));
-    onSnapshot(q, (querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        let checkExistDocument = this.histories.find(
-          (item) => item.id === doc.id
-        );
-        if (!checkExistDocument) {
-          this.histories = [...this.histories, { id: doc.id, ...doc.data() }];
-        }
-      });
-    });
-
-    // get rooms
-    const queryRoom = query(
-      collection(db, "room"),
-      orderBy("createdAt", "asc")
-    );
-    onSnapshot(queryRoom, (querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        let checkExistDocument = this.rooms.find((item) => item.id === doc.id);
-        if (!checkExistDocument) {
-          this.rooms = [...this.rooms, { id: doc.id, ...doc.data() }];
-        }
-      });
-    });
-
-    // get users
-    let emailSignIn = localStorage.getItem("emailForSignIn");
-    const queryUser = query(
-      collection(db, "user"),
-      where("email", "!=", emailSignIn)
-    );
-    onSnapshot(queryUser, (querySnapshot) => {
-      querySnapshot.forEach((docRef) => {
-        let checkExistDocument = this.users.find(
-          (item) => item.id === docRef.id
-        );
-        if (!checkExistDocument) {
-          let emailAuth = localStorage.getItem("emailForSignIn");
-          if (emailAuth != docRef.data().email) {
-            this.users.push({
-              ...docRef.data(),
-              id: docRef.id,
-            });
-          }
-        }
-      });
-    });
-
     // before browser or tab close
     window.addEventListener("beforeunload", async function () {
-      let authToken = localStorage.getItem("firebase-auth-token");
-
-      await updateDoc(doc(db, "user", authToken), {
+      alert("asdfasdf");
+      await updateDoc(doc(db, "user", this.me.uid), {
         online: false,
       });
     });
   },
 
-  updated() {
-    this.scrollToBottom();
-  },
-
   async beforeDestroy() {
-    let authToken = localStorage.getItem("firebase-auth-token");
-
-    await updateDoc(doc(db, "user", authToken), {
+    await updateDoc(doc(db, "user", this.me.uid), {
       online: false,
     });
-  },
-
-  computed: {
-    messages() {
-      return this.histories?.messages;
-    },
-  },
-
-  methods: {
-    async sentMessage() {
-      let msg = this.messageInput;
-      this.messageInput = "";
-      if (msg.length > 0) {
-        if (!this.histories.uid) {
-          const docRef = await addDoc(collection(db, "room"), {
-            createdAt: new Date(),
-            userIds: [this.auth.uid, this.targetInfo.id],
-          });
-          this.histories.uid = docRef.id;
-        }
-
-        await addDoc(collection(db, "room", this.histories.uid, "messages"), {
-          content: msg,
-          createdAt: new Date(),
-          userId: "user/" + this.auth?.uid,
-        });
-
-        this.getMessages();
-      }
-    },
-
-    scrollToBottom() {
-      const chatBox = document.getElementById("chat-histories");
-      if (chatBox) {
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    },
-
-    chooseRoom(roomId) {
-      this.roomActive = roomId;
-    },
-
-    async openChatHistories(email) {
-      const q = query(collection(db, "user"), where("email", "==", email));
-      this.histories = { uid: "", messages: [] };
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((docRef) => {
-        this.targetInfo = { id: docRef.id, ...docRef.data() };
-      });
-
-      if (this.targetInfo) {
-        const qHistories = query(
-          collection(db, "room"),
-          where("userIds", "in", [
-            [this.auth?.uid, this.targetInfo.id],
-            [this.targetInfo.id, this.auth.uid],
-          ])
-        );
-
-        const historySnapshot = await getDocs(qHistories);
-        historySnapshot.forEach((docRef) => {
-          this.histories.uid = docRef.id;
-        });
-      }
-
-      if (this.histories.uid) {
-        this.getMessages();
-      }
-    },
-
-    async getMessages() {
-      const qMessages = query(
-        collection(db, "room", this.histories.uid, "messages"),
-        orderBy("createdAt", "asc")
-      );
-
-      await onSnapshot(qMessages, (messageSnapshot) => {
-        messageSnapshot.forEach((docRef) => {
-          let checkExistDocument = this.histories.messages.find(
-            (item) => item.id === docRef.id
-          );
-          if (!checkExistDocument) {
-            this.histories.messages.push({ id: docRef.id, ...docRef.data() });
-          }
-        });
-      });
-    },
-
-    async findRoom() {
-      if (this.targetInfo) {
-        const qHistories = query(
-          collection(db, "room"),
-          where("userIds", "in", [
-            [this.auth?.uid, this.targetInfo.id],
-            [this.targetInfo.id, this.auth.uid],
-          ])
-        );
-
-        const historySnapshot = await getDocs(qHistories);
-        historySnapshot.forEach((docRef) => {
-          this.histories.uid = docRef.id;
-        });
-      }
-    },
-
-    checkActiveMsg(uid) {
-      if (this.targetInfo) {
-        if (this.targetInfo.id === uid) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-
-    getTime(createdAt) {
-      let time = new Date(
-        createdAt.seconds * 1000 + createdAt.nanoseconds / 1e6
-      );
-      return this.$dayjs(time).format("HH:mm");
-    },
   },
 };
 </script>
