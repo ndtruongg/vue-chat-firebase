@@ -12,7 +12,14 @@
           <img :src="item.avatar" :alt="item.nickname" />
           <span :class="[item.online === true ? 'active' : '', 'dot']"></span>
         </div>
-        {{ item.nickname }}
+        <div class="_info">
+          <p class="name">
+            {{ item.nickname }}
+          </p>
+          <span v-if="!item.online" class="last-login">
+            {{ getLastLogin(item.lastLogin) }}
+          </span>
+        </div>
       </button>
     </template>
   </div>
@@ -38,6 +45,23 @@ export default {
     async showChat(email) {
       await this.$store.dispatch("chat/getTarget", email);
       await this.$store.dispatch("chat/getMessages");
+    },
+
+    getLastLogin(lastTime) {
+      let lastLogin =
+        new Date().getTime() -
+        lastTime.seconds * 1000 +
+        lastTime.nanoseconds / 1e6;
+
+      let minutes = Math.floor(lastLogin / 60000);
+      if (minutes >= 60) {
+        let hours = Math.floor(minutes / 60);
+        if (hours >= 24) {
+          return Math.floor(hours / 24) + "d ago";
+        }
+        return hours + "h ago";
+      }
+      return minutes + "m ago";
     },
   },
 };
@@ -84,6 +108,21 @@ export default {
         width: 40px;
         border-radius: 50%;
         height: 40px;
+      }
+    }
+
+    ._info {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      .name {
+        font-size: 16px;
+      }
+      .last-login {
+        margin-top: 3px;
+        text-align: left;
+        font-size: 12px;
+        color: #888888;
       }
     }
 
