@@ -37,17 +37,21 @@ export default {
   mounted() {
     // before browser or tab close
     window.addEventListener("beforeunload", async function () {
-      alert("asdfasdf");
-      await updateDoc(doc(db, "user", this.me.uid), {
-        online: false,
-      });
+      this.deactivate();
     });
   },
 
-  async beforeDestroy() {
-    await updateDoc(doc(db, "user", this.me.uid), {
-      online: false,
-    });
+  beforeDestroy() {
+    this.deactivate();
+  },
+
+  methods: {
+    async deactivate() {
+      await updateDoc(doc(db, "user", this.me.uid), {
+        online: false,
+        lastLogin: new Date(),
+      });
+    },
   },
 };
 </script>
