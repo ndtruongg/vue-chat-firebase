@@ -11,9 +11,14 @@ const routes = [
     path: "/",
     name: "Home",
     component: () => import("./components/Chat.vue"),
-    meta: {
-      middleware: [auth],
-    },
+    children: [
+      {
+        path: "/:id",
+        meta: {
+          middleware: [auth],
+        },
+      },
+    ],
   },
   {
     path: "/login",

@@ -41,7 +41,14 @@ export default {
     },
   },
 
-  created() {
+  watch: {
+    $route: async function () {
+      this.getData();
+    },
+  },
+
+  async created() {
+    this.getData();
     window.addEventListener(
       "beforeunload",
       () => {
@@ -61,6 +68,14 @@ export default {
         online: false,
         lastLogin: new Date(),
       });
+    },
+
+    async getData() {
+      let uid = this.$route.params?.id || null;
+      if (uid) {
+        await this.$store.dispatch("chat/getTarget", uid);
+        await this.$store.dispatch("chat/getMessages");
+      }
     },
   },
 };

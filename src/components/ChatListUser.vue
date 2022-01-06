@@ -1,27 +1,25 @@
 <template>
   <div class="list-user">
     <h2 class="list-user__title">Chats</h2>
-    <template v-for="(item, key) of users">
-      <button
-        v-if="item.uid !== me.uid"
-        :key="key"
-        :class="[target.uid === item.uid ? 'active' : '', 'list-user__item']"
-        @click="showChat(item.email)"
-      >
-        <div class="_avatar">
-          <img :src="item.avatar" :alt="item.nickname" />
-          <span :class="[item.online === true ? 'active' : '', 'dot']"></span>
-        </div>
-        <div class="_info">
-          <p class="name">
-            {{ item.nickname }}
-          </p>
-          <span v-if="!item.online" class="last-login">
-            {{ getLastLogin(item.lastLogin) }}
-          </span>
-        </div>
-      </button>
-    </template>
+    <router-link
+      v-for="(item, key) of users"
+      :to="'/' + item.uid"
+      :key="key"
+      :class="[checkWhoTarget(item.uid) ? 'active' : '', 'list-user__item']"
+    >
+      <div class="_avatar">
+        <img :src="item.avatar" :alt="item.nickname" />
+        <span :class="[item.online === true ? 'active' : '', 'dot']"></span>
+      </div>
+      <div class="_info">
+        <p class="name">
+          {{ item.nickname }}
+        </p>
+        <span v-if="!item.online" class="last-login">
+          {{ getLastLogin(item.lastLogin) }}
+        </span>
+      </div>
+    </router-link>
   </div>
 </template>
 
@@ -48,6 +46,14 @@ export default {
       await this.$store.dispatch("chat/getTarget", email);
       await this.$store.dispatch("chat/getMessages");
     },
+
+    checkWhoTarget(id) {
+      if (this.$route.params.id === id) {
+        return true;
+      }
+
+      return false;
+    },
   },
 };
 </script>
@@ -71,6 +77,8 @@ export default {
     align-items: center;
     padding: 10px;
     cursor: pointer;
+    text-decoration: none;
+    color: #000;
     &.active {
       background: #f1f1f1;
       border-radius: 10px;

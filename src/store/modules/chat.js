@@ -7,6 +7,9 @@ import {
   where,
   getDocs,
   orderBy,
+  addDoc,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 
 export const state = {
@@ -58,51 +61,18 @@ export const actions = {
     });
   },
 
-  async getTarget({ commit }, email) {
-    const q = query(collection(db, "user"), where("email", "==", email));
-    const querySnapshot = await getDocs(q);
+  async getTarget({ commit }, uid) {
     let payload = null;
-    querySnapshot.forEach((docRef) => {
-      payload = { uid: docRef.id, ...docRef.data() };
-    });
+    const docRef = doc(db, "user", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      payload = { uid, ...docSnap.data() };
+    }
 
     commit("SET_TARGET", payload);
     commit("SET_MESSAGES", []); // reset when change target
     commit("SET_MESSAGE_UID", null);
-
-    // if (payload) {
-    //   const queryMsg = query(
-    //     collection(db, "room"),
-    //     where("userIds", "in", [
-    //       [rootState.me.info.uid, payload.uid],
-    //       [payload.uid, rootState.me.info.uid],
-    //     ])
-    //   );
-
-    //   const historySnapshot = await getDocs(queryMsg);
-    //   historySnapshot.forEach(async (docRef) => {
-    //     const qMessages = query(
-    //       collection(db, "room", docRef.id, "messages"),
-    //       orderBy("createdAt", "asc")
-    //     );
-
-    //     commit("SET_MESSAGE_UID", docRef.id);
-
-    //     await onSnapshot(qMessages, (messageSnapshot) => {
-    //       let messages = state.messages;
-    //       messageSnapshot.forEach((docMsg) => {
-    //         let checkExistDocument = messages.find(
-    //           (item) => item.id === docMsg.id
-    //         );
-    //         if (!checkExistDocument) {
-    //           messages = [...messages, { id: docMsg.id, ...docMsg.data() }];
-    //         }
-    //       });
-
-    //       commit("SET_MESSAGES", messages);
-    //     });
-    //   });
-    // }
   },
 
   async getMessages({ commit, state, rootState }) {
@@ -115,27 +85,34 @@ export const actions = {
     );
 
     const historySnapshot = await getDocs(queryMsg);
-    historySnapshot.forEach(async (docRef) => {
-      const qMessages = query(
-        collection(db, "room", docRef.id, "messages"),
-        orderBy("createdAt", "asc")
-      );
+    if (!historySnapshot.empty) {
+      historySnapshot.forEach(async (docRef) => {
+        const qMessages = query(
+          collection(db, "room", docRef.id, "messages"),
+          orderBy("createdAt", "asc")
+        );
+        commit("SET_MESSAGE_UID", docRef.id);
 
-      commit("SET_MESSAGE_UID", docRef.id);
+        await onSnapshot(qMessages, (messageSnapshot) => {
+          let messages = state.messages;
+          messageSnapshot.forEach((docMsg) => {
+            let checkExistDocument = messages.find(
+              (item) => item.id === docMsg.id
+            );
+            if (!checkExistDocument) {
+              messages = [...messages, { id: docMsg.id, ...docMsg.data() }];
+            }
+          });
 
-      await onSnapshot(qMessages, (messageSnapshot) => {
-        let messages = state.messages;
-        messageSnapshot.forEach((docMsg) => {
-          let checkExistDocument = messages.find(
-            (item) => item.id === docMsg.id
-          );
-          if (!checkExistDocument) {
-            messages = [...messages, { id: docMsg.id, ...docMsg.data() }];
-          }
+          commit("SET_MESSAGES", messages);
         });
-
-        commit("SET_MESSAGES", messages);
       });
-    });
+    } else {
+      const docRef = await addDoc(collection(db, "room"), {
+        createdAt: new Date(),
+        userIds: [rootState.me.info.uid, state.target.uid],
+      });
+      commit("SET_MESSAGE_UID", docRef.id);
+    }
   },
 };
