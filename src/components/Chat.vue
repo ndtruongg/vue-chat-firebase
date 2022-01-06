@@ -114,10 +114,6 @@ export default {
 
   &-detail {
     width: calc(100% - 300px);
-
-    &__body {
-      padding: 12px;
-    }
   }
 }
 </style>

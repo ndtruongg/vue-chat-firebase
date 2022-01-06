@@ -60,13 +60,13 @@ export default {
 
 <style lang="scss" scoped>
 .list-user {
-  padding: 12px;
+  padding: 12px 20px;
   display: flex;
   flex-direction: column;
   width: 300px;
-  border-right: 1px solid #e9e9e9;
   height: 100%;
   overflow: auto;
+  background-color: #fbfbfb;
 
   &__title {
     margin-bottom: 10px;
@@ -79,9 +79,14 @@ export default {
     cursor: pointer;
     text-decoration: none;
     color: #000;
+    background: #fff;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    transition: ease 0.3s all;
+    box-shadow: 0 0 35px -10px rgba(0, 0, 0, 0.15);
     &.active {
-      background: #f1f1f1;
-      border-radius: 10px;
+      background-color: #0e0e0e;
+      color: #fff;
     }
 
     ._avatar {

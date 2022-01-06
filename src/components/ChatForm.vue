@@ -86,12 +86,14 @@ export default {
 <style lang="scss" scoped>
 .chat-form {
   display: flex;
+  padding: 12px;
+  box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.1);
   input {
     flex: 1;
     max-width: calc(100% - 50px);
     padding: 0 15px;
-    border: 1px solid #cecece;
     border-radius: 20px;
+    background-color: #f9f9f9;
   }
 
   button {

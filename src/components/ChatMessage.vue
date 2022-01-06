@@ -11,6 +11,7 @@
       :key="key"
       :ignoreTime="ignoreTime(key)"
       :msg="item"
+      :class="firstInPeriod(key) ? 'first' : ''"
     />
   </div>
 </template>
@@ -48,12 +49,33 @@ export default {
           this.messages[key + 1].createdAt.seconds / 60
         );
 
-        if (minuteSentMsg === minuteSentMsgNext) {
+        if (
+          minuteSentMsg === minuteSentMsgNext &&
+          this.messages[key].userId === this.messages[key + 1].userId
+        ) {
           return true;
         }
       }
 
       return false;
+    },
+
+    firstInPeriod(key) {
+      let minuteSentMsg = Math.floor(this.messages[key].createdAt.seconds / 60);
+      if (this.messages[key - 1]) {
+        let minuteSentMsgPrev = Math.floor(
+          this.messages[key - 1].createdAt.seconds / 60
+        );
+
+        if (
+          minuteSentMsg === minuteSentMsgPrev &&
+          this.messages[key].userId === this.messages[key - 1].userId
+        ) {
+          return false;
+        }
+      }
+
+      return true;
     },
   },
 };
@@ -65,6 +87,7 @@ export default {
   overflow: auto;
   padding-right: 3px;
   margin-bottom: 10px;
+  padding: 12px;
   &::-webkit-scrollbar {
     width: 3px;
   }

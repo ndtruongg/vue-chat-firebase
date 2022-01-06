@@ -10,7 +10,7 @@
         <div :class="['dot', target.online ? 'active' : '']"></div>
         <template v-if="target.online"> Active now </template>
         <template v-else>
-          {{ getLastLogin(target.lastLogin) }}
+          Last seen {{ getLastLogin(target.lastLogin) }}
         </template>
       </div>
     </div>
@@ -39,7 +39,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 10px;
-  border-bottom: 1px solid #e9e9e9;
+  box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.15);
   &-avatar {
     width: 50px;
     height: 50px;

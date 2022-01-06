@@ -1,12 +1,19 @@
 <template>
-  <div :class="[getClass, 'mes-box']">
+  <div :class="[getClass, !ignoreTime ? 'last' : '', 'mes-box']">
     <template v-if="getClass === 'date'">
       <div class="date">
         {{ getTime(msg.createdAt, "HH:mm MMM D, YYYY") }}
       </div>
     </template>
     <template v-else>
-      <div class="mes">{{ msg.content }}</div>
+      <div class="mes">
+        <div v-if="getClass !== 'date' && !ignoreTime" class="mes-avatar">
+          <img :src="user.avatar" :alt="user.nickname" />
+        </div>
+        <div class="mes-content">
+          {{ msg.content }}
+        </div>
+      </div>
       <div v-if="!ignoreTime" class="time">{{ getTime(msg.createdAt) }}</div>
     </template>
   </div>
@@ -24,6 +31,7 @@ export default {
   computed: {
     ...mapGetters({
       me: "me/info",
+      target: "chat/target",
     }),
 
     getClass() {
@@ -32,6 +40,14 @@ export default {
       }
 
       return "date";
+    },
+
+    user() {
+      if (this.getClass === "rtl") {
+        return { avatar: this.me.photoURL, nickname: this.me.displayName };
+      }
+
+      return this.target;
     },
   },
 
@@ -59,24 +75,85 @@ export default {
   }
   &.rtl {
     align-items: flex-end;
-
     .mes {
-      background-color: #2980b9;
-      border-radius: 20px 18px 5px 20px;
+      padding-right: 40px;
+      &-content {
+        background-image: linear-gradient(45deg, #671e86, #af0ff3);
+        color: #fff;
+        border-radius: 20px 5px 5px 20px;
+      }
+
+      &-avatar {
+        right: 0;
+      }
+    }
+
+    &.first {
+      .mes-content {
+        border-bottom-right-radius: 5px;
+        border-top-right-radius: 20px;
+      }
+    }
+
+    &.last {
+      .mes-content {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 20px;
+      }
     }
   }
   &.ltr {
     align-items: flex-start;
     .mes {
-      border-radius: 20px 20px 20px 5px;
-      background-color: #2c3e50;
+      padding-left: 40px;
+      &-content {
+        background-color: #efefef;
+        border-radius: 5px 20px 20px 5px;
+      }
+
+      &-avatar {
+        left: 0;
+      }
+    }
+
+    &.first {
+      .mes-content {
+        border-bottom-left-radius: 5px;
+        border-top-left-radius: 20px;
+      }
+    }
+
+    &.last {
+      .mes-content {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 20px;
+      }
+    }
+
+    &.last.first {
+      .mes-content {
+        border-radius: 20px;
+      }
     }
   }
   .mes {
-    padding: 6px 12px;
-    margin-bottom: 2px;
-    color: #fff;
-    box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    &-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: absolute;
+      top: 10px;
+    }
+
+    &-content {
+      padding: 8px 20px;
+      margin-bottom: 2px;
+      color: #000000;
+      position: relative;
+      border-radius: 20px;
+    }
   }
 
   .date {
