@@ -1,10 +1,16 @@
 <template>
   <div class="chat-messages" id="chat-messages">
+    <div class="target">
+      <div class="target-avatar">
+        <img :src="target.avatar" :alt="target.nickname" />
+      </div>
+      <h3>{{ target.nickname }}</h3>
+    </div>
     <ChatMessageBox
       v-for="(item, key) of messages"
       :key="key"
+      :ignoreTime="ignoreTime(key)"
       :msg="item"
-      :class="[item.userId.includes(me.uid) ? 'rtl' : 'ltr']"
     />
   </div>
 </template>
@@ -24,6 +30,7 @@ export default {
     ...mapGetters({
       messages: "chat/messages",
       me: "me/info",
+      target: "chat/target",
     }),
   },
 
@@ -33,6 +40,20 @@ export default {
       if (chatBox) {
         chatBox.scrollTop = chatBox.scrollHeight;
       }
+    },
+    ignoreTime(key) {
+      let minuteSentMsg = Math.floor(this.messages[key].createdAt.seconds / 60);
+      if (this.messages[key + 1]) {
+        let minuteSentMsgNext = Math.floor(
+          this.messages[key + 1].createdAt.seconds / 60
+        );
+
+        if (minuteSentMsg === minuteSentMsgNext) {
+          return true;
+        }
+      }
+
+      return false;
     },
   },
 };
@@ -59,6 +80,22 @@ export default {
 
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
+  }
+
+  .target {
+    margin: 30px auto;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    &-avatar {
+      img {
+        display: block;
+        border-radius: 50%;
+        margin-bottom: 10px;
+      }
+    }
   }
 }
 </style>

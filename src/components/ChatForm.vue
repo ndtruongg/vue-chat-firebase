@@ -28,12 +28,21 @@ export default {
       me: "me/info",
       target: "chat/target",
       messageUID: "chat/messageUID",
+      messages: "chat/messages",
     }),
   },
 
   methods: {
     async sentMessage() {
       let msg = this.messageInput;
+      let time = Math.floor(new Date().getTime() / 86400000);
+      let lastMsgTime = new Date().getTime(this.$dayjs().format("MM/DD/YYYY"));
+      if (this.messages[this.messages.length - 1]) {
+        lastMsgTime = Math.floor(
+          this.messages[this.messages.length - 1].createdAt.seconds / 86400
+        );
+      }
+
       this.messageInput = "";
       if (msg.length > 0) {
         if (!this.messageUID) {
@@ -45,12 +54,25 @@ export default {
           this.msgUID = docRef.id;
         }
 
+        if (time !== lastMsgTime) {
+          await addDoc(
+            collection(db, "room", this.msgUID || this.messageUID, "messages"),
+            {
+              content: "",
+              createdAt: new Date(),
+              type: 2,
+              userId: "",
+            }
+          );
+        }
+
         await addDoc(
           collection(db, "room", this.msgUID || this.messageUID, "messages"),
           {
             content: msg,
             createdAt: new Date(),
             userId: "user/" + this.me?.uid,
+            type: 1,
           }
         );
       }

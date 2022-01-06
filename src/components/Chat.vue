@@ -2,11 +2,13 @@
   <div class="chat">
     <ChatListUser />
     <div class="chat-detail">
-      <ChatDetailHeader />
-      <div class="chat-detail__body">
-        <ChatMessage />
-        <ChatForm />
-      </div>
+      <template v-if="!checkTargetExist">
+        <ChatDetailHeader />
+        <div class="chat-detail__body">
+          <ChatMessage />
+          <ChatForm />
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -31,14 +33,22 @@ export default {
   computed: {
     ...mapGetters({
       me: "me/info",
+      target: "chat/target",
     }),
+
+    checkTargetExist() {
+      return Object.keys(this.target).length === 0;
+    },
   },
 
-  mounted() {
-    // before browser or tab close
-    window.addEventListener("beforeunload", async function () {
-      this.deactivate();
-    });
+  created() {
+    window.addEventListener(
+      "beforeunload",
+      () => {
+        this.deactivate();
+      },
+      false
+    );
   },
 
   beforeDestroy() {
@@ -93,162 +103,6 @@ export default {
     &__body {
       padding: 12px;
     }
-  }
-
-  &-history {
-    height: calc(100vh - 145px);
-    overflow: auto;
-    padding-right: 3px;
-    margin-bottom: 10px;
-    &::-webkit-scrollbar {
-      width: 3px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 5px;
-    }
-
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-
-    .mes-box {
-      display: flex;
-      align-items: flex-start;
-      .time {
-        font-size: 12px;
-        margin-top: 12px;
-        margin-left: 12px;
-        color: #888;
-      }
-      &.rtl {
-        justify-content: flex-end;
-
-        .time {
-          order: 1;
-          margin-right: 12px;
-        }
-
-        .mes {
-          order: 2;
-          background-color: #2980b9;
-          border-radius: 20px 18px 5px 20px;
-        }
-      }
-      &.ltr {
-        .mes {
-          border-radius: 20px 20px 20px 5px;
-          background-color: #2c3e50;
-        }
-      }
-      .mes {
-        padding: 6px 12px;
-        margin-bottom: 2px;
-        color: #fff;
-      }
-    }
-  }
-
-  &-form {
-    display: flex;
-    input {
-      flex: 1;
-      max-width: calc(100% - 50px);
-      padding: 0 15px;
-      border: 1px solid #cecece;
-      border-radius: 20px;
-    }
-
-    button {
-      margin-left: 10px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: ease 0.3s;
-      span {
-        transition: ease 0.3s;
-        color: #727272;
-      }
-
-      &:hover,
-      &.active {
-        background: #3498db;
-        span {
-          color: #fff;
-        }
-      }
-    }
-  }
-
-  .list-user {
-    &__item {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      cursor: pointer;
-      &.active {
-        background: #f1f1f1;
-        border-radius: 10px;
-      }
-
-      ._avatar {
-        width: 40px;
-        height: 40px;
-        position: relative;
-        margin-right: 10px;
-
-        .dot {
-          position: absolute;
-          z-index: 2;
-          bottom: 0px;
-          right: 0px;
-        }
-
-        img {
-          width: 40px;
-          border-radius: 50%;
-          height: 40px;
-        }
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #cecece;
-
-        &.active {
-          background: #18eb05;
-        }
-      }
-    }
-  }
-}
-
-.insert {
-  &-enter,
-  &-leave-to {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-
-  &-enter-active,
-  &-leave-active {
-    transition: ease 0.4s all;
-  }
-
-  &-enter-to,
-  &-leave {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>

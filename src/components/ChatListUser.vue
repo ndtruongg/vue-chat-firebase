@@ -27,6 +27,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { getLastLogin } from "@/utils/time.js";
 export default {
   name: "ChatListUser",
   computed: {
@@ -42,26 +43,10 @@ export default {
   },
 
   methods: {
+    getLastLogin,
     async showChat(email) {
       await this.$store.dispatch("chat/getTarget", email);
       await this.$store.dispatch("chat/getMessages");
-    },
-
-    getLastLogin(lastTime) {
-      let lastLogin =
-        new Date().getTime() -
-        lastTime.seconds * 1000 +
-        lastTime.nanoseconds / 1e6;
-
-      let minutes = Math.floor(lastLogin / 60000);
-      if (minutes >= 60) {
-        let hours = Math.floor(minutes / 60);
-        if (hours >= 24) {
-          return Math.floor(hours / 24) + "d ago";
-        }
-        return hours + "h ago";
-      }
-      return minutes + "m ago";
     },
   },
 };
@@ -123,17 +108,6 @@ export default {
         text-align: left;
         font-size: 12px;
         color: #888888;
-      }
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #cecece;
-
-      &.active {
-        background: #18eb05;
       }
     }
   }
