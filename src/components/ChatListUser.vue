@@ -66,7 +66,8 @@ export default {
   width: 300px;
   height: 100%;
   overflow: auto;
-  background-color: #fbfbfb;
+  z-index: 2;
+  border-right: 1px solid #f7f7f7;
 
   &__title {
     margin-bottom: 10px;
@@ -83,10 +84,8 @@ export default {
     margin-bottom: 8px;
     border-radius: 10px;
     transition: ease 0.3s all;
-    box-shadow: 0 0 35px -10px rgba(0, 0, 0, 0.15);
     &.active {
-      background-color: #0e0e0e;
-      color: #fff;
+      background-color: rgba(210, 226, 255, 0.29);
     }
 
     ._avatar {

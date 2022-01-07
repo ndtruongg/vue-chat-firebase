@@ -87,7 +87,7 @@ export default {
 .chat-form {
   display: flex;
   padding: 12px;
-  box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 12px -5px rgba(0, 0, 0, 0.1);
   input {
     flex: 1;
     max-width: calc(100% - 50px);

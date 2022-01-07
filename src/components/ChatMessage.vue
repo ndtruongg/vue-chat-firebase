@@ -83,10 +83,9 @@ export default {
 
 <style lang="scss" scoped>
 .chat-messages {
-  height: calc(100vh - 145px);
+  height: calc(100vh - 135px);
   overflow: auto;
   padding-right: 3px;
-  margin-bottom: 10px;
   padding: 12px;
   &::-webkit-scrollbar {
     width: 3px;

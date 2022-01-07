@@ -2,12 +2,15 @@
   <div :class="[getClass, !ignoreTime ? 'last' : '', 'mes-box']">
     <template v-if="getClass === 'date'">
       <div class="date">
-        {{ getTime(msg.createdAt, "HH:mm MMM D, YYYY") }}
+        {{ getTime(msg.createdAt, "MMM D, YYYY") }}
       </div>
     </template>
     <template v-else>
       <div class="mes">
-        <div v-if="getClass !== 'date' && !ignoreTime" class="mes-avatar">
+        <div
+          v-if="['date', 'rtl'].indexOf(getClass) === -1 && !ignoreTime"
+          class="mes-avatar"
+        >
           <img :src="user.avatar" :alt="user.nickname" />
         </div>
         <div class="mes-content">
@@ -76,9 +79,8 @@ export default {
   &.rtl {
     align-items: flex-end;
     .mes {
-      padding-right: 40px;
       &-content {
-        background-image: linear-gradient(45deg, #671e86, #af0ff3);
+        background-color: royalblue;
         color: #fff;
         border-radius: 20px 5px 5px 20px;
       }
@@ -105,7 +107,7 @@ export default {
   &.ltr {
     align-items: flex-start;
     .mes {
-      padding-left: 40px;
+      padding-left: 35px;
       &-content {
         background-color: #efefef;
         border-radius: 5px 20px 20px 5px;
@@ -139,20 +141,21 @@ export default {
   .mes {
     position: relative;
     &-avatar {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       overflow: hidden;
       position: absolute;
-      top: 10px;
+      top: 6px;
     }
 
     &-content {
-      padding: 8px 20px;
+      padding: 6px 12px;
       margin-bottom: 2px;
       color: #000000;
       position: relative;
       border-radius: 20px;
+      font-size: 15px;
     }
   }
 

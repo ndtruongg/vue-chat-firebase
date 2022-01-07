@@ -39,7 +39,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 10px;
-  box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 20px -10px rgba(0, 0, 0, 0.15);
   &-avatar {
     width: 50px;
     height: 50px;
